@@ -1,0 +1,64 @@
+{
+  "name": "node-express-typescript-starter-assets",
+  "version": "1.0.0",
+  "description": "Nodejs / Typescript / Express / Prisma Boilerplate.",
+  "main": "index.js",
+  "engines": {
+    "node": "^14.x || ^16.x || ^18.x"
+  },
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon dist/index.js",
+    "dev:watch": "nodemon src/index.ts",
+    "check-lint": "eslint . --ignore-path .gitignore",
+    "check-format": "prettier --list-different --ignore-path .gitignore .",
+    "lint": "eslint . --fix --ignore-path .gitignore",
+    "format": "prettier --write --list-different --ignore-path .gitignore .",
+    "install:clean": "rm -rf node_modules && rm yarn.lock && yarn",
+    "build": "tsc",
+    "watch": "tsc -w --preserveWatchOutput",
+    "postinstall": "npx prisma generate",
+    "develop": "npx prisma migrate dev --create-only",
+    "deploy": "npx prisma migrate deploy",
+    "generate": "npx prisma generate"
+  },
+  "repository": "https://github.com/CodeKaizoku/node-express-typescript-starter",
+  "keywords": [],
+  "author": "Hanish Rao",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@prisma/client": "^4.9.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "date-fns": "^2.29.3",
+    "dotenv-expand": "^10.0.0",
+    "express": "^4.18.2",
+    "helmet": "^6.0.1",
+    "joi": "^17.7.0",
+    "jsonwebtoken": "^9.0.0",
+    "nodemailer": "^6.9.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.15",
+    "@types/joi": "^17.2.3",
+    "@types/jsonwebtoken": "^9.0.1",
+    "@types/node": "^18.11.18",
+    "@types/nodemailer": "^6.4.7",
+    "@types/uuid": "^9.0.0",
+    "eslint": "^8.32.0",
+    "eslint-config-galex": "^4.4.2",
+    "lint-staged": "^13.1.0",
+    "nodemon": "^2.0.20",
+    "prettier": "^2.8.3",
+    "prisma": "^4.9.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  },
+  "lint-staged": {
+    "*.{js,ts}": "yarn lint",
+    "*.{js,ts,json,css,md}": "yarn format"
+  }
+}

@@ -1,0 +1,23 @@
+apiVersion: skaffold/v2alpha4
+kind: Config
+build:
+  tagPolicy:
+    sha256: {}
+  artifacts:
+    - image: {{.ECR_URL}}
+      context: ./
+  local:
+    push: false
+deploy:
+  helm:
+    flags:
+      upgrade: ["--install", "--timeout=15m"]
+      install: ["--install","--timeout=15m", "--create-namespace"]
+    releases:
+      - name: assets
+        chartPath: ./helm
+        wait: true
+        values:
+          image: {{.ECR_URL}}
+        setValueTemplates:
+          replicas: "1"
