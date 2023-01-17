@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assets
+spec:
+  replicas: {{ .Values.replicas | default 1}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: assets
+    spec:
+      terminationGracePeriodSeconds:  10
+      {{ if and (.Values.profile) (eq .Values.profile "aws") }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "node-type"
+                    operator: In
+                    values:
+                      - worker
+      {{ end }}
+      containers:
+      - name: assets
+        image: {{ .Values.image }}
+        imagePullPolicy: Always
+        {{ if and (.Values.profile) (eq .Values.profile "aws") }}
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 128m
+        {{ end }}
+        env:
+        - name: BROKER
+          value: "broker:9092"
+        ports:
+          - containerPort: 3000

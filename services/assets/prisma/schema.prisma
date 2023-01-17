@@ -1,0 +1,130 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "postgresqlExtensions"]
+  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgcrypto]
+}
+
+model user {
+  id                BigInt         @id @default(autoincrement())
+  dial_code         String?        @db.VarChar(5)
+  phone_number      String?        @db.VarChar(15)
+  phone_otp         String?        @db.VarChar(6)
+  email             String?        @db.VarChar(255)
+  password          String?        @db.VarChar(255)
+  email_otp         String?        @db.VarChar(6)
+  is_email_verified Boolean        @default(false)
+  last_login_method String?        @db.VarChar(255)
+  last_login        DateTime?      @db.Timestamp(6)
+  created_at        DateTime?      @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?      @updatedAt @db.Timestamp(6)
+  reset_password    Boolean        @default(false)
+  deleted_at        DateTime?      @db.Timestamp(6)
+  blog              blog[]
+  blog_comment      blog_comment[]
+  blog_like         blog_like[]
+}
+
+model blog {
+  id                   BigInt                  @id @default(autoincrement())
+  title                String                  @db.VarChar(255)
+  content              String
+  is_published         Boolean                 @default(false) @db.Boolean
+  cover                Json?
+  author_id            BigInt
+  likes                Int                     @default(0)
+  views                Int                     @default(0)
+  average_reading_time Int                     @default(0)
+  created_at           DateTime?               @default(now()) @db.Timestamp(6)
+  updated_at           DateTime?               @updatedAt @db.Timestamp(6)
+  deleted_at           DateTime?               @db.Timestamp(6)
+  is_like_enabled      Boolean                 @default(true)
+  is_comment_enabled   Boolean                 @default(true)
+  user                 user                    @relation(fields: [author_id], references: [id])
+  comments             blog_comment[]
+  categories           blog_category_mapping[]
+  tags                 blog_tag_mapping[]
+  blog_like            blog_like[]
+}
+
+model blog_comment {
+  id           BigInt    @id @default(autoincrement())
+  blog_id      BigInt
+  parent_id    BigInt?
+  content      String
+  user_id      BigInt
+  is_published Boolean   @default(false) @db.Boolean
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at   DateTime? @db.Timestamp(6)
+  parent_comment blog_comment?  @relation("CommentHasParent", fields: [parent_id], references: [id])
+  child_comment  blog_comment[] @relation("CommentHasParent")
+  blog           blog           @relation(fields: [blog_id], references: [id])
+  user           user           @relation(fields: [user_id], references: [id])
+}
+
+model blog_category {
+  id           BigInt    @id @default(autoincrement())
+  parent_id    BigInt?
+  title        String?   @db.VarChar(255)
+  slug_char    String    @unique @db.VarChar(255)
+  content      String
+  is_published Boolean   @default(false) @db.Boolean
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at   DateTime? @db.Timestamp(6)
+  parent_category blog_category?  @relation("CategoryHasParent", fields: [parent_id], references: [id])
+  child_category  blog_category[] @relation("CategoryHasParent")
+  blogs blog_category_mapping[]
+}
+
+model blog_category_mapping {
+  id               BigInt @id @default(autoincrement())
+  blog_id          BigInt
+  blog_category_id BigInt
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+  blog     blog          @relation(fields: [blog_id], references: [id])
+  category blog_category @relation(fields: [blog_category_id], references: [id])
+}
+
+model blog_like {
+  id         BigInt    @id @default(autoincrement())
+  blog_id    BigInt
+  user_id    BigInt
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+  blog       blog      @relation(fields: [blog_id], references: [id])
+  user       user      @relation(fields: [user_id], references: [id])
+
+  @@unique([blog_id, user_id])
+}
+
+model blog_tag_mapping {
+  id         BigInt    @id @default(autoincrement())
+  blog_id    BigInt
+  tag_id     BigInt
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+  blog       blog      @relation(fields: [blog_id], references: [id])
+  tag        tag       @relation(fields: [tag_id], references: [id])
+}
+
+model tag {
+  id                 BigInt               @id @default(autoincrement())
+  name               String               @db.VarChar(255)
+  is_verified        Boolean?
+  created_at         DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?            @updatedAt @db.Timestamp(6)
+  deleted_at         DateTime?            @db.Timestamp(6)
+  blogs              blog_tag_mapping[]
+}
+
